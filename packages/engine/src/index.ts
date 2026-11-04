@@ -14,4 +14,5 @@ export * from "./hints";
 export * from "./notebook";
 export * from "./evidence";
 export * from "./clock";
+export * from "./tension";
 export * from "./story";

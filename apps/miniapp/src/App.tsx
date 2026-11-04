@@ -1,10 +1,11 @@
 import {
-  changedQualities, choiceCost, choose, clockTime, continueOutcome, currentNotes, currentOutcome, currentReport, currentScene, emptyProfile, endingView, evidenceView, getQuality,
+  changedQualities, choiceCost, choose, clockTime, continueOutcome, currentNotes, currentOutcome, currentReport, currentScene, emptyProfile, endingView, evidenceView, getQuality, isTense,
   morningNotes, newCase, newNight, notebookView, pledge, profileOf, storyView, type GameState, type Profile,
 } from "@belvedere/engine";
 import { RESERVED_QUALITIES } from "@belvedere/content-schema";
 import { Backdrop, ChoiceList, ConfirmSheet, DoorPicker, EndingPage, EvidencePage, Hint, MorningPage, NotebookPage, PledgePicker, QualityBar, ReportPage, SceneCard, StoryPage, TitleScreen, type LifeLineItem } from "@belvedere/ui-kit";
 import { useCallback, useEffect, useState } from "preact/hooks";
+import { initAudio, isSoundOn, playLighter, setSoundOn, setTension } from "./audio";
 import { loadContent, type Content } from "./content";
 import { saves } from "./saves";
 import { EMPTY_UI, type UiMeta } from "./storage";
@@ -42,6 +43,7 @@ export function App() {
   const [hints, setHints] = useState<string[]>([]);
   /** Index of an ending choice waiting for the player's confirmation. */
   const [confirm, setConfirm] = useState<number | null>(null);
+  const [soundOn, setSoundOnState] = useState(isSoundOn);
 
   useEffect(() => {
     (async () => {
@@ -50,6 +52,7 @@ export function App() {
         const p = (await saves.loadProfile()) ?? emptyProfile();
         const [run, meta] = await Promise.all([saves.loadRun(p), saves.loadUi()]);
         setContent(c);
+        initAudio();
         setProfile(p);
         setState(run);
         setUi(meta);
@@ -83,6 +86,9 @@ export function App() {
   }, []);
   // Telegram's gear opens the same reset; in a browser the link lives at the bottom of the notebook.
   useEffect(() => setSettingsButton(content !== null, () => void reset()), [content, reset]);
+  // The music follows the run: tense while rules.tensionWhen holds, calm on the title and the morning page.
+  const tense = content !== null && state !== null && isTense(state, content.world);
+  useEffect(() => setTension(tense), [tense]);
 
   if (screen.kind === "loading") return <div class="screen" />;
   if (screen.kind === "error" || !content) return <div class="screen"><p class="scene__text" style="padding:24px">Ошибка: {screen.kind === "error" ? screen.message : "нет контента"}</p></div>;
@@ -98,6 +104,7 @@ export function App() {
   const saveUi = (next: UiMeta) => { setUi(next); saves.persistUi(next); };
 
   const startNight = () => {
+    playLighter();
     const s = newNight(profile, world, randomSeed());
     setState(s);
     setScreen({ kind: "night" });
@@ -157,6 +164,8 @@ export function App() {
           nights={getQuality({ run: {}, profile: profile.profile }, world, "nights")}
           onContinue={() => setScreen({ kind: "night" })}
           onNewNight={startNight}
+          soundLabel={soundOn ? "Звук: вкл" : "Звук: выкл"}
+          onToggleSound={() => { setSoundOn(!soundOn); setSoundOnState(!soundOn); }}
         />
       </div>
     );
