@@ -1,9 +1,6 @@
 import type { Storylet, World } from "@belvedere/content-schema";
-import { evaluateAll } from "./conditions";
+import { evaluateAll, type Bags } from "./conditions";
 import { nextInt, type RngState } from "./rng";
-import type { GameState } from "./state";
-
-type Bags = Pick<GameState, "run" | "profile">;
 
 /** Storylets eligible at a location, highest priority only. */
 export function candidates(state: Bags, world: World, location: string): Storylet[] {
