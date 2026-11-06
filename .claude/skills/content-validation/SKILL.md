@@ -12,7 +12,7 @@ description: Что проверяет validator, как добавить нов
 
 | Правило | Что ловит | Уровень |
 |---|---|---|
-| `qualities` | условие или эффект на необъявленное качество, в том числе в `rules.*` (включая `pledgedNightWhen`), `report.notes`, `morning.notes`, `notebook` и эпилогах концовок; `rules.clock.quality` не объявлено; `rules.start` указывает на несуществующую локацию | error |
+| `qualities` | условие или эффект на необъявленное качество, в том числе в `rules.*` (включая `pledgedNightWhen` и `tensionWhen`), `report.notes`, `morning.notes`, `notebook` и эпилогах концовок; `rules.clock.quality` не объявлено; `rules.start` указывает на несуществующую локацию | error |
 | `references` | `goto` выбора или перехвата на несуществующую локацию; `background`/`portrait` нет в `assets.json` | error |
 | `dead-ends` | локация без сторилетов (error); сторилет, у которого все choices условные (warning) | error / warning |
 | `reachability` | локация, недостижимая из `rules.start` по графу `goto` (условия игнорируются) | warning |
